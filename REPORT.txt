@@ -1,0 +1,77 @@
+BAO CAO TRIEN KHAI GIT REPOSITORY (CHI TIET)
+===========================================
+
+1) MUC TIEU
+- Tao repository Git sach cho dung 4 file da chot pham vi.
+- Ap dung commit style: Conventional Commits + mo ta tieng Viet.
+- Giu nguyen output notebook.
+- Lien ket remote GitHub: https://github.com/n22dccn196/Mekong.git
+
+2) PHAM VI
+- app14.py
+- final3.py
+- update_data.py
+- final2 (2) - Copy.ipynb (giu nguyen output)
+
+Tai lieu bo sung:
+- .gitignore
+- README.md
+- REPORT.md
+- REPORT.txt
+
+3) QUYET DINH DA CHOT
+- Tao repo moi rieng tai thu muc: Mekong
+- Remote da ton tai tren GitHub, se add origin va push
+- Commit sequence nhieu buoc de audit ro rang
+- Bao cao xuat ca Markdown va TXT
+
+4) PHUONG AN KHA DUNG DA XEM XET
+A. Init git tai root hien tai
+   + Nhanh
+   - De lan data lon va artifact
+B. Repo moi rieng (DA CHON)
+   + Sach, kiem soat scope tot
+   - Can copy file
+C. Tao remote bang web (DA CHON)
+D. Tao remote bang gh CLI
+E. Xac thuc push: HTTPS+PAT / gh auth login / SSH
+
+5) KICH BAN TRIEN KHAI
+B1. Tao thu muc Mekong va copy dung 4 file trong scope
+B2. git init, tao .gitignore va README.md
+B3. Tao 4 commit theo thu tu:
+   1) chore(repo): initialize repository structure - khoi tao cau truc repo
+   2) feat(core): add forecasting scripts - them cac script du bao chinh
+   3) docs(notebook): add analysis notebook - them notebook phan tich
+   4) docs(report): add detailed execution report - them bao cao chi tiet
+B4. Add remote origin va push nhanh main
+B5. Kiem chung git status / git log / git remote -v
+
+6) COMMAND LOG TOM TAT
+- Tao thu muc + copy file
+- git init
+- git add / git commit theo tung moc
+- git remote add origin ...
+- git push -u origin main
+- git status, git log --oneline, git remote -v
+
+7) KIEM CHUNG
+- Scope dung 4 file nghiep vu + tai lieu repo
+- Lich su commit dung trinh tu
+- Nhanh chinh: main
+- Remote: origin -> https://github.com/n22dccn196/Mekong.git
+- Working tree sach sau khi hoan tat
+
+8) RUI RO VA XU LY
+- Push 403/auth failed: dung PAT, gh auth login, hoac SSH
+- Remote origin da ton tai: git remote set-url origin <url>
+- Notebook diff lon: giu nguyen theo policy, can thi chuan hoa sau
+
+9) ROLLBACK
+- Hoan tac commit gan nhat: git reset --soft HEAD~1
+- Ve commit cu the: git reset --hard <commit_sha>
+- Doi remote URL: git remote set-url origin <new_url>
+
+10) KET LUAN
+Da trien khai dung scope va dung kich ban: repo sach, commit co thu tu ro rang,
+notebook giu nguyen output, san sang dong bo len GitHub bang remote da cung cap.
