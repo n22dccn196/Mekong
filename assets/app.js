@@ -8,10 +8,11 @@ var overallState=document.getElementById("overall-state");
 var connectionLabel=document.getElementById("connection-label");
 var updatedAt=document.getElementById("updated-at");
 var footerSource=document.getElementById("footer-source");
+var stationCount=document.getElementById("station-count");
 function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function time(v){if(!v)return "—";var d=new Date(v);return isNaN(d)?"—":d.toLocaleString("en-GB",{timeZone:"UTC",month:"short",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false})+" UTC"}
 function statusClass(s){if(s==="LIVE_VERIFIED"||s==="LIVE_AWAITING_NEXT_MEASUREMENT")return "live";if(s==="STALE"||s==="SOURCE_ERROR"||s==="METADATA_INCOMPLETE")return "stale";return "pending"}
-function statusText(s){return ({LIVE_VERIFIED:"LIVE VERIFIED",LIVE_AWAITING_NEXT_MEASUREMENT:"LIVE · WAITING",LIVE_BLOCKED:"LIVE BLOCKED",STALE:"STALE",SOURCE_ERROR:"SOURCE ERROR",METADATA_INCOMPLETE:"METADATA CHECK"}[s]||String(s||"CHECKING").replace(/_/g," "))}
+function statusText(s){return ({LIVE_VERIFIED:"LIVE VERIFIED",LIVE_AWAITING_NEXT_MEASUREMENT:"LIVE · WAITING",LIVE_BLOCKED:"LIVE BLOCKED",NOT_COLLECTED:"NOT COLLECTED",STALE:"STALE",SOURCE_ERROR:"SOURCE ERROR",METADATA_INCOMPLETE:"METADATA CHECK"}[s]||String(s||"CHECKING").replace(/_/g," "))}
 function chart(points){
  if(!points||points.length<2)return '<div class="chart-wrap"><div class="forecast-empty">Not enough recent measurements to draw a trend.</div></div>';
  var vals=points.map(function(p){return Number(p.water_level_m)}).filter(Number.isFinite);if(vals.length<2)return "";
@@ -21,9 +22,9 @@ function chart(points){
  var area=line+" L "+coords[coords.length-1][0]+" "+(h-pad)+" L "+coords[0][0]+" "+(h-pad)+" Z",last=coords[coords.length-1];
  return '<div class="chart-wrap"><svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Water level observations in the last 24 hours"><path class="chart-gridline" d="M10 20H510 M10 55H510 M10 90H510"/><path class="chart-area" d="'+area+'"/><path class="chart-line" d="'+line+'"/><circle class="chart-point" cx="'+last[0]+'" cy="'+last[1]+'" r="4"/></svg></div>';
 }
-function forecastCells(items){
+function forecastCells(items,reason){
  var wanted=[15,60,360];
- if(!items||!items.length)return '<div class="forecast-empty">Forecast hidden · feed, metadata or freshness check is not ready.</div>';
+ if(!items||!items.length)return '<div class="forecast-empty">Forecast hidden - '+esc(reason||"feed, metadata or freshness check is not ready.")+'</div>';
  return wanted.map(function(minutes){
   var f=items.find(function(x){return Number(x.horizon_minutes)===minutes}),label=minutes<60?"+15 MIN":minutes===60?"+1 HOUR":"+6 HOURS";
   if(!f)return '<div class="forecast-cell"><span>'+label+'</span><strong>—</strong><small>not verified</small></div>';
@@ -34,9 +35,10 @@ function renderStations(data){
  if(!data||!data.length){stationGrid.innerHTML='<article class="empty-card"><p>No MRC station data is available. Forecasts remain blocked.</p></article>';return}
  stationGrid.innerHTML=data.map(function(s){
   var m=s.latest_measurement||{},status=s.status||"LIVE_BLOCKED",forecasts=s.forecast||[];
-  return '<article class="station-card"><div class="station-card-head"><div><h3 class="station-name">'+esc(s.name||s.station_id)+'</h3><div class="station-id">MRC STATION '+esc(s.station_id)+'</div><div class="river-name">'+esc(s.river||"Mekong")+' · Viet Nam</div></div><span class="status-label '+statusClass(status)+'">'+esc(statusText(status))+'</span></div>'+
+  var reason=s.observation_reason?'<div class="station-note">'+esc(s.observation_reason)+'</div>':"";
+  return '<article class="station-card"><div class="station-card-head"><div><h3 class="station-name">'+esc(s.name||s.station_id)+'</h3><div class="station-id">MRC STATION '+esc(s.station_id)+'</div><div class="river-name">'+esc(s.river||"Unknown river")+' | '+esc(s.country||"Country not verified")+"</div></div><span class="status-label '+statusClass(status)+'">'+esc(statusText(status))+'</span></div>'+
    '<div class="station-main"><div><div class="level-number">'+(m.water_level_m==null?"—":Number(m.water_level_m).toFixed(3))+'<small>m</small></div><div class="level-label">LATEST OBSERVED WATER LEVEL</div></div><div class="time-pair">MEASURED&nbsp; <b>'+esc(time(m.measured_at_utc))+'</b><br>RECEIVED&nbsp; <b>'+esc(time(m.received_at_utc))+'</b><br>AGE&nbsp; <b>'+(m.age_minutes==null?"—":esc(m.age_minutes)+" min")+'</b></div></div>'+
-   chart(s.history_24h)+'<div class="forecast-strip">'+forecastCells(forecasts)+'</div><div class="station-id" style="padding:0 19px 12px">MODEL '+esc(s.model_version||"not serving")+' · MRC TELEMETRY</div></article>';
+   reason+chart(s.history_24h)+'<div class="forecast-strip">'+forecastCells(forecasts,s.forecast_reason)+'</div><div class="station-id" style="padding:0 19px 12px">MODEL '+esc(s.model_version||"not serving")+' · MRC TELEMETRY</div></article>';
  }).join("");
 }
 function n(v,d){return v==null?"—":Number(v).toFixed(d||3)}
@@ -51,7 +53,8 @@ function renderBenchmark(data){
  }).join("");
 }
 function render(data){
- var good=(data.stations||[]).some(function(s){return s.status==="LIVE_VERIFIED"||s.status==="LIVE_AWAITING_NEXT_MEASUREMENT"});
+ var allStations=data.stations||[];if(stationCount)stationCount.textContent=allStations.length+" stations in the MRC telemetry catalog";
+ var good=allStations.some(function(s){return s.status==="LIVE_VERIFIED"||s.status==="LIVE_AWAITING_NEXT_MEASUREMENT"});
  overallState.textContent=good?"LIVE DATA":"CHECK STATUS";overallState.className="state-chip "+(good?"state-live":"state-wait");
  connectionLabel.textContent=good?"MRC link active":"MRC link blocked or stale";document.querySelector(".live-dot").classList.toggle("on",good);
  updatedAt.textContent="Service checked "+time(data.server_time_utc);footerSource.textContent="Source status: "+(good?"live verification retained":"blocked or stale");
