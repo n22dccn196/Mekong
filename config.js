@@ -1,0 +1,1 @@
+window.MEKONG_API_BASE="https://desktop-cglr491.tail1f74f3.ts.net:8443";
