@@ -4,55 +4,95 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f3f7f5">
-  <meta name="description" content="MRC station observations and eligible water-level research forecasts.">
+  <meta name="description" content="MRC station observations, history and eligible water-level research forecasts.">
   <title>Mekong Signals — Water levels</title>
-  <link rel="stylesheet" href="./assets/app.css?v=station-detail-20261123e">
+  <link rel="stylesheet" href="./assets/app.css?v=public-dashboard-20261128a">
   <script src="./config.js"></script>
-  <script defer src="./assets/app.js?v=copy-trim-20261126"></script>
+  <script defer src="./assets/app.js?v=public-dashboard-20261128a"></script>
 </head>
 <body>
-<div class="shell">
-  <header class="topbar">
-    <a class="brand" href="./" aria-label="Mekong Signals home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>MEKONG <b>SIGNALS</b></span></a>
-    <div class="topbar-right"><span class="live-dot"></span><span id="connection-label">Connecting</span><span class="topbar-divider"></span><span class="topbar-label">MRC TELEMETRY</span></div>
-  </header>
-  <main>
-    <section class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow"><span class="eyebrow-line"></span> MEKONG BASIN · MRC TELEMETRY</p>
-        <h1>Water-level<br><em>monitoring</em></h1>
-        <p class="hero-sub">MRC observations · verified research forecasts</p>
-        <div class="hero-meta"><span class="source-pill"><span class="source-icon">M</span> Mekong River Commission</span><span class="meta-sep">•</span><span>15-minute telemetry</span><span class="meta-sep">•</span><span id="updated-at">Waiting for first update</span></div>
-      </div>
-      <div class="hero-aside">
-        <div class="aside-top"><span class="aside-label">MRC STATUS</span><span id="overall-state" class="state-chip state-wait">CHECKING</span></div>
-        <div class="aside-value">Station readings<span>Observed levels</span></div>
-        <div class="aside-rule"></div>
-        <div class="aside-foot"><span>FORECASTS</span><strong>Verified pairs only</strong></div>
-        <div class="aside-foot"><span>HISTORY</span><strong>Last 24 hours</strong></div>
-        <div class="aside-foot"><span>REFRESH</span><strong>Every 30 seconds</strong></div>
-      </div>
-    </section>
-    <nav class="tabs" role="tablist" aria-label="Dashboard views"><button class="tab active" role="tab" aria-selected="true" aria-controls="panel-live" id="tab-live" data-tab="live"><span>01</span> Stations</button></nav>
-    <section id="panel-live" class="tab-panel active" role="tabpanel" aria-labelledby="tab-live">
-      <div class="section-heading">
-        <div><p class="eyebrow">CURRENT CONDITIONS</p><h2>Station readings</h2></div>
-        <div class="section-tools"><p class="section-note"><strong id="station-count">Loading MRC stations…</strong><br>Measured · received · freshness</p><button id="retry-button" class="button" type="button">Retry</button></div>
-      </div>
-      <div id="connection-notice" class="connection-notice" role="status" aria-live="polite" hidden></div>
-      <div class="live-dashboard">
-        <aside class="station-browser">
-          <div class="station-browser-head"><div><p class="eyebrow">MRC CATALOG</p><h3>Stations</h3></div><label class="filter-label" for="country-filter">COUNTRY<select id="country-filter"><option value="all">All countries</option></select></label></div>
-          <div id="station-grid" class="station-list"><div class="empty-card"><span class="spinner"></span><p>Loading MRC data…</p></div></div>
-        </aside>
-        <section id="station-detail" class="station-detail" aria-live="polite"><div class="empty-card"><p>Select a station.</p></div></section>
-      </div>
-      <div class="fineprint"><span class="fineprint-mark">i</span><span>Research forecasts are not official flood warnings.</span></div>
-    </section>
-  </main>
-  <footer class="footer"><span>MEKONG SIGNALS</span><span id="footer-source">Source status: checking</span><span>UTC timestamps</span></footer>
-  <div hidden aria-hidden="true"><div id="model-summary"></div><div id="benchmark-grid"></div></div>
-</div>
-<div id="toast" class="sr-only" aria-live="polite"></div>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Mekong Signals home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>MEKONG <b>SIGNALS</b></span></a>
+      <div class="topbar-right"><span id="connection-dot" class="live-dot"></span><span id="connection-label">Connecting</span><span class="topbar-divider"></span><span id="updated-at">Waiting for first update</span></div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow"><span class="eyebrow-line"></span> MEKONG BASIN · MRC TELEMETRY</p>
+          <h1>Water-level<br><em>monitoring</em></h1>
+          <p class="hero-sub">Station observations · history · eligible research forecasts</p>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-top"><span>MRC STATUS</span><span id="overall-state" class="state-chip state-wait">CHECKING</span></div>
+          <strong id="hero-count">— stations</strong>
+          <div class="hero-card-line"></div>
+          <div class="hero-facts"><span>Refresh</span><b>30 seconds</b></div>
+          <div class="hero-facts"><span>Freshness limit</span><b id="freshness-limit">30 minutes</b></div>
+          <div class="hero-facts"><span>Forecasts</span><b>Verified pairs only</b></div>
+        </div>
+      </section>
+
+      <nav class="tabs" role="tablist" aria-label="Dashboard sections">
+        <button class="tab active" id="tab-stations" role="tab" aria-selected="true" aria-controls="panel-stations" data-panel="stations">Stations</button>
+        <button class="tab" id="tab-compare" role="tab" aria-selected="false" aria-controls="panel-compare" data-panel="compare">Compare</button>
+        <button class="tab" id="tab-health" role="tab" aria-selected="false" aria-controls="panel-health" data-panel="health">Health &amp; alerts <span id="alert-count" class="count-badge">0</span></button>
+      </nav>
+
+      <section id="panel-stations" class="tab-panel active" role="tabpanel" aria-labelledby="tab-stations">
+        <div class="section-heading">
+          <div><p class="eyebrow">STATION NETWORK</p><h2>Map and station detail</h2></div>
+          <div class="section-tools"><p id="station-count" class="section-note">Loading MRC stations…</p><button id="retry-button" class="button" type="button">Retry</button></div>
+        </div>
+        <div id="connection-notice" class="connection-notice" role="status" aria-live="polite" hidden></div>
+
+        <div class="station-layout">
+          <aside class="network-column">
+            <article class="panel map-panel">
+              <div class="panel-heading"><div><p class="eyebrow">STATION LOCATOR</p><h3>Mekong stations</h3></div><span class="panel-tag">GENERALIZED CONTEXT</span></div>
+              <svg id="station-map" viewBox="0 0 620 520" role="img" aria-label="Station locator; generalized context only, not a flood map"></svg>
+              <p class="map-caption">Natural Earth generalized locator context · not station topology or flood extent. <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noopener noreferrer">Source and terms</a></p>
+            </article>
+            <article class="panel station-browser">
+              <div class="panel-heading"><div><p class="eyebrow">MRC CATALOG</p><h3>Find a station</h3></div><span id="visible-count" class="panel-tag">—</span></div>
+              <label class="search-label" for="station-search">Search by station, ID, river or country<input id="station-search" type="search" autocomplete="off" placeholder="e.g. Chau Doc or 039801"></label>
+              <div class="filters">
+                <label for="country-filter">Country<select id="country-filter"><option value="all">All countries</option></select></label>
+                <label for="river-filter">River<select id="river-filter"><option value="all">All rivers</option></select></label>
+                <label for="status-filter">Status<select id="status-filter"><option value="all">All states</option><option value="live">Live / waiting</option><option value="stale">Stale / source error</option><option value="blocked">Blocked / unavailable</option></select></label>
+              </div>
+              <div id="station-grid" class="station-list"><div class="empty-card"><span class="spinner"></span><p>Loading station catalog…</p></div></div>
+            </article>
+          </aside>
+
+          <section id="station-detail" class="station-detail" aria-live="polite"><div class="empty-card"><p>Select a station.</p></div></section>
+        </div>
+        <p class="fineprint">Research forecasts are point estimates, not official flood warnings. Threshold signals remain disabled until station mapping, units, datum and effective dates are verified.</p>
+      </section>
+
+      <section id="panel-compare" class="tab-panel" role="tabpanel" aria-labelledby="tab-compare" hidden>
+        <div class="section-heading"><div><p class="eyebrow">MULTI-STATION VIEW</p><h2>Compare water levels</h2></div><p id="compare-summary" class="section-note">Choose stations from the MRC catalog.</p></div>
+        <div class="panel compare-controls">
+          <label for="compare-stations">Stations<select id="compare-stations" multiple size="5" aria-describedby="compare-hint"></select></label>
+          <div class="range-controls"><label for="compare-period">Window<select id="compare-period"><option value="24h">24 hours</option><option value="7d">7 days</option><option value="season">Season · up to 180 days</option><option value="custom">Custom dates</option></select></label><label class="custom-date" for="compare-start" hidden>From<input id="compare-start" type="date"></label><label class="custom-date" for="compare-end" hidden>Through<input id="compare-end" type="date"></label><button id="compare-load" class="button" type="button">Load comparison</button></div>
+          <p id="compare-hint" class="muted">Each series keeps its station's unit and gauge reference. Up to six stations; no datum conversion is applied.</p>
+        </div>
+        <div id="compare-warning" class="notice" hidden></div>
+        <article class="panel compare-panel"><div class="panel-heading"><div><p class="eyebrow">OBSERVED AND VERIFIED FORECAST SERIES</p><h3>Selected stations</h3></div><div class="export-actions"><button id="compare-export-csv" class="button" type="button" disabled>Export CSV</button><button id="compare-export-png" class="button" type="button" disabled>Export chart PNG</button></div></div><svg id="compare-chart" viewBox="0 0 900 360" role="img" aria-label="Selected station water-level comparison"></svg><div id="compare-legend" class="legend"></div><div id="compare-table" class="table-wrap"></div></article>
+      </section>
+
+      <section id="panel-health" class="tab-panel" role="tabpanel" aria-labelledby="tab-health" hidden>
+        <div class="section-heading"><div><p class="eyebrow">NETWORK STATUS</p><h2>Health and alerts</h2></div><div class="section-tools"><p id="health-checked" class="section-note">Loading service checks…</p><button id="health-refresh" class="button" type="button">Refresh status</button></div></div>
+        <div id="threshold-status" class="threshold-banner"><strong>Threshold alerts unavailable</strong><span>Checking verified station thresholds…</span></div>
+        <article class="panel health-panel"><div class="panel-heading"><div><p class="eyebrow">SOURCE · COLLECTOR · HISTORY · MODEL</p><h3>Station health</h3></div><span id="health-count" class="panel-tag">— stations</span></div><div id="health-table" class="table-wrap"><p class="muted pad">Health checks load when this section opens.</p></div></article>
+        <article class="panel alerts-panel"><div class="panel-heading"><div><p class="eyebrow">THIS DASHBOARD ONLY</p><h3>Recent events</h3></div><button id="clear-alerts" class="button" type="button">Clear list</button></div><ol id="alert-list" class="alert-list"><li class="muted">No events recorded in this page session.</li></ol></article>
+      </section>
+    </main>
+
+    <footer class="footer"><span>MEKONG SIGNALS</span><span id="footer-source">Source status: checking</span><span>Times shown in UTC</span></footer>
+  </div>
+  <div id="alert-toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <div id="toast" class="sr-only" aria-live="polite"></div>
 </body>
 </html>
